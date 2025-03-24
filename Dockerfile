@@ -13,8 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the project files into the container
 COPY . /app/
 
-# Expose the port Django runs on
+# Expose the port Gunicorn will listen on
 EXPOSE 8080
 
-# Run migrations and start the server
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8080"]
+# Run migrations and start the Gunicorn server
+CMD ["sh", "-c", "python manage.py migrate && gunicorn capstone.wsgi:application --bind 0.0.0.0:8080"]
