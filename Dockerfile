@@ -17,4 +17,4 @@ COPY . /app/
 EXPOSE 8080
 
 # Run migrations and start the Gunicorn server
-CMD ["sh", "-c", "python manage.py migrate && gunicorn capstone.wsgi:application --bind 0.0.0.0:8080"]
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn capstone.wsgi:application --bind 0.0.0.0:8080"]
