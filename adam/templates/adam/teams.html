@@ -1,0 +1,79 @@
+{% extends "adam/base.html" %}
+
+{% block content %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .teams-container {
+            width: 80%;
+            margin: 50px auto;
+            text-align: center;
+            color: white;
+        }
+        .team {
+            background: #2f3136;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+        }
+        .team button {
+            padding: 10px 20px;
+            border: none;
+            background: #7289da;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .team button:hover {
+            background: #5b6eae;
+        }
+        .team-members {
+            list-style-type: none;
+            padding: 0;
+        }
+        .team-members li {
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="teams-container">
+        <h1>Our Teams</h1>
+        
+        <div class="team">
+            <button onclick="location.href='team1-report.html'">Team 1 Report</button>
+            <ul class="team-members">
+                <li>Artist A</li>
+                <li>Artist B</li>
+                <li>Artist C</li>
+            </ul>
+        </div>
+        
+        <div class="team">
+            <button onclick="location.href='team2-report.html'">Team 2 Report</button>
+            <ul class="team-members">
+                <li>Artist D</li>
+                <li>Artist E</li>
+                <li>Artist F</li>
+            </ul>
+        </div>
+        
+        <div class="team">
+            <button onclick="location.href='team3-report.html'">Team 3 Report</button>
+            <ul class="team-members">
+                <li>Artist G</li>
+                <li>Artist H</li>
+                <li>Artist I</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock content %}

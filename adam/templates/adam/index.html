@@ -1,0 +1,78 @@
+{% extends "adam/base.html" %}
+
+{% block content %}
+<div class="chat-container">
+	<div class="chat-box" id="chatBox">
+		<!-- Chat messages will go here -->
+	</div>
+	<div class="chat-input">
+		<textarea id="chatInput" placeholder="Type a message..."></textarea>
+		<button onclick="sendMessage()">Send</button>
+	</div>
+</div>
+
+<script>
+	function sendMessage() {
+		let chatBox = document.getElementById("chatBox");
+		let chatInput = document.getElementById("chatInput");
+		let message = chatInput.value.trim();
+		if (message) {
+			let msgDiv = document.createElement("div");
+			msgDiv.classList.add("message");
+			msgDiv.innerHTML = `<strong>User</strong>: ${message}`;
+			chatBox.appendChild(msgDiv);
+			chatBox.scrollTop = chatBox.scrollHeight;
+			chatInput.value = "";
+		}
+	}
+</script>
+
+<style>
+	.chat-container {
+		width: 60%;
+		height: 500px;
+		margin: 50px auto;
+		display: flex;
+		flex-direction: column;
+		border-radius: 10px;
+		overflow: hidden;
+		background: #36393f;
+		color: white;
+	}
+	.chat-box {
+		flex-grow: 1;
+		padding: 1px;
+		overflow-y: auto;
+		background: #2f3136;
+	}
+	.chat-input {
+		display: flex;
+		border-top: 1px solid #202225;
+		background: #40444b;
+	}
+	.chat-input textarea {
+		flex-grow: 1;
+		padding: 10px;
+		border: none;
+		resize: none;
+		background: #40444b;
+		color: white;
+	}
+	.chat-input button {
+		padding: 10px 15px;
+		border: none;
+		background: #7289da;
+		color: white;
+		cursor: pointer;
+	}
+	.chat-input button:hover {
+		background: #5b6eae;
+	}
+	.message {
+		padding: 10px;
+		margin: 5px 0;
+		background: #40444b;
+		border-radius: 5px;
+	}
+</style>
+{% endblock content %}

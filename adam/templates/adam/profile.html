@@ -1,0 +1,56 @@
+{% extends "adam/base.html" %}
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .profile-container {
+            width: 60%;
+            margin: 50px auto;
+            padding: 20px;
+            background: #2f3136;
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .profile-info {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .role {
+            font-weight: bold;
+            color: #7289da;
+        }
+        .teams-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        .teams-list li {
+            background: #40444b;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h1>User Profile</h1>
+        <div class="profile-info">
+            <p><strong>Username:</strong> <span id="username">JohnDoe</span></p>
+            <p><strong>Role:</strong> <span class="role" id="userRole">Artist</span></p>
+        </div>
+        <h2>Teams</h2>
+        <ul class="teams-list">
+            <li>Team 1 - <span class="team-id">#101</span></li>
+            <li>Team 2 - <span class="team-id">#202</span></li>
+        </ul>
+    </div>
+</body>
+</html>
+{% endblock content %}

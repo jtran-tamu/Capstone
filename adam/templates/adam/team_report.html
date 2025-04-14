@@ -1,0 +1,10 @@
+{% extends "adam/base.html" %}
+
+{% block content %}
+
+{% for artist in artists %}
+{{ artist.user.username }}
+{% endfor %}
+
+{% endblock content %}
+
