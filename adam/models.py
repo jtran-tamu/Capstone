@@ -33,3 +33,20 @@ class Form(models.Model):
 class Report(models.Model):
     forms = models.ManyToManyField(Form)
     summary = models.TextField()
+
+class ConversationSession(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	started_at = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"{self.user.username} | {self.started_at.strftime('%b %d, %Y %I:%M%p')}"
+
+
+class ConversationMessage(models.Model):
+	session = models.ForeignKey(ConversationSession, on_delete=models.CASCADE, related_name='messages')
+	role = models.CharField(max_length=10, choices=[("user", "User"), ("assistant", "Assistant")])
+	content = models.TextField()
+	timestamp = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return f"{self.role}: {self.content[:30]}"

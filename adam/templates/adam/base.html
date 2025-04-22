@@ -8,6 +8,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href={% static "assets/css/main.css" %} />
 		<link rel="stylesheet" href={% static "assets/css/sticky-footer.css" %}/>
+		{% block extra_styles %}{% endblock extra_styles %}
 	</head>
 	<body class="is-preload">
 
@@ -29,6 +30,29 @@
 								<li><a href={% url "adam:teams" %} id="teams-link"><span class="icon solid fa-th">Teams</span></a></li>
 								<li><a href={% url "adam:profile" %} id="profile-link"><span class="icon solid fa-user">Profile</span></a></li>
 							</ul>
+							{% if user.is_authenticated %}
+								<div class="px-4 pt-2 pb-1">
+									<a href="{% url 'new_chat' %}" class="text-sm text-blue-400 hover:underline">
+									+ New Chat
+									</a>
+								</div>
+							{% endif %}
+							{% if user.is_authenticated and conversation_sessions %}
+								<hr>
+								<h4 class="text-xs uppercase tracking-wide text-gray-400 px-4 pt-2">Conversations</h4>
+									<ul class="text-sm space-y-1 px-4 pb-2">
+										{% for session in conversation_sessions %}
+										<li>
+											<a href="{% url 'view_conversation' session.id %}"
+											class="{% if session.id == active_session.id %}text-white font-semibold{% else %}text-gray-300 hover:text-white{% endif %}">
+											🗓 {{ session.started_at|date:"M d, g:i A" }}
+											</a>
+										</li>
+										{% empty %}
+										<li class="text-gray-500 text-xs italic">No chats yet.</li>
+										{% endfor %}
+									</ul>
+							{% endif %}
 						</nav>
 				</div>
 			</div>
