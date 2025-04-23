@@ -2,9 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Task(models.Model):
+    artist = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
     due_date = models.DateField()
     progress = models.PositiveIntegerField()
     description = models.TextField()
+
+    def __str__(self):
+        return f"{self.description[:30]} ({self.progress}%)"
 
 class ProjectManager(models.Model):
     team_id = models.IntegerField()
@@ -13,7 +17,6 @@ class ProjectManager(models.Model):
 class Artist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     team_id = models.IntegerField()
-    tasks = models.ManyToManyField(Task, blank=True)
 
 class Question(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
@@ -23,6 +26,12 @@ class Question(models.Model):
 class Answer(models.Model):
     question = models.OneToOneField(Question, on_delete=models.CASCADE)
     response = models.TextField()
+
+class CheckinResponse(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
 
 class Form(models.Model):
     questions = models.ManyToManyField(Question)

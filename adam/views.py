@@ -1,34 +1,35 @@
-from django.shortcuts import get_object_or_404, render, get_list_or_404, redirect
+from django.shortcuts import get_object_or_404, render, get_list_or_404
 from django.urls import reverse
 from django.template import loader
-from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.utils import timezone
+from django.http import HttpResponse, HttpResponseRedirect
+from django.http import Http404
 from django.db.models import F
-from .models import Answer, Question, Artist, ProjectManager, Form, Report, Task, ConversationSession, ConversationMessage
+from .models import Answer, Question, Artist, ProjectManager, Form, Report, Task, ConversationSession, ConversationMessage, CheckinResponse
 from django.http import JsonResponse
 import openai
 import json
 from django.conf import settings
 import logging
-from django.contrib.auth.decorators import login_required
-from .utils.decorators import login_or_admin_required
+from adam.models import Artist, Question, Answer
+from django.contrib.auth.models import User
 
 logger = logging.getLogger(__name__)
 # Create your views here.
+
+CHECKIN_QUESTIONS = [
+    "What did you work on today?",
+    "Did you face any challenges?",
+    "How much progress did you make (%) on your current task?",
+    "Do you think you'll meet your next deadline?",
+    "Anything blocking your work?",
+]
 
 def team_report(request, team_id):
     artists = get_list_or_404(Artist, team_id = team_id)
     return render(request, "adam/team_report.html", {"artists": artists})
 
 def home(request):
-	sessions = ConversationSession.objects.filter(user=request.user).order_by('-started_at')
-	return render(request, "adam/index.html", {
-		"conversation_sessions": sessions
-	})
-@login_required
-def home(request):
-    sessions = ConversationSession.objects.filter(user=request.user).order_by('-started_at')
-    return render(request, "adam/index.html", {"conversation_sessions": sessions})
+    return render(request, "adam/index.html")
 
 def chat_view(request):
     return render(request, "adam/index.html")
@@ -42,71 +43,70 @@ def profile(request):
 def about(request):
     return render(request, "adam/about.html")
 
-def view_conversation(request, session_id):
-	session = get_object_or_404(ConversationSession, id=session_id, user=request.user)
-	messages = session.messages.order_by('timestamp')  # oldest first
-	sessions = ConversationSession.objects.filter(user=request.user).order_by('-started_at')
-
-	return render(request, "adam/index.html", {
-		"conversation_sessions": sessions,
-		"messages": messages,
-		"active_session": session
-	})
-
-def new_chat_session(request):
-    if not request.user.is_authenticated:
-        return redirect("login")  # Or your login route
-
-    # Create a new session
-    session = ConversationSession.objects.create(user=request.user)
-
-    # Optional: add a welcome message
-    # from .models import ConversationMessage
-    # ConversationMessage.objects.create(
-    #     session=session, role="assistant", content="Hi! What would you like help with today?"
-    # )
-
-    return redirect("view_conversation", session_id=session.id)
-
 client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
 
 def chatbot_api(request):
-	if request.method == "POST":
-		try:
-			data = json.loads(request.body)
-			message = data.get("message", "")
-			user = request.user
+    user = User.objects.get(username="artist1")  # Temporary for testing purposes
+    
+    tasks = Task.objects.filter(artist__user=user)
+    task_summary = "\n".join([f"- {t.description} ({t.progress}%)" for t in tasks])
 
-			# Get/create session
-			session, created = ConversationSession.objects.get_or_create(
-				user=user,
-				started_at__date=timezone.now().date()
-			)
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            user_input = data.get("message", "")
 
-			# Save user message
-			ConversationMessage.objects.create(session=session, role="user", content=message)
+            if hasattr(user, 'artist'):
+                # Artist check-in logic
+                step = request.session.get('checkin_step', 0)
 
-			# Fetch last 10 messages (reversed)
-			_msgs = session.messages.order_by('-timestamp')[:10][::-1]
+                if step < len(CHECKIN_QUESTIONS):
+                    # Record answer if not the first question
+                    if step > 0:
+                        CheckinResponse.objects.create(
+                            user=user,
+                            question=CHECKIN_QUESTIONS[step - 1],
+                            answer=user_input
+                        )
 
-			messages = [{"role": m.role, "content": m.content} for m in _msgs]
+                    # Ask next question
+                    next_question = CHECKIN_QUESTIONS[step]
+                    request.session['checkin_step'] = step + 1
+                    request.session.modified = True
+                    return JsonResponse({"reply": next_question})
 
-			messages.insert(0, {
-				"role": "system",
-				"content": "You are A.D.A.M., a helpful AI assistant..."
-			})
+                else:
+                    # Record final response
+                    CheckinResponse.objects.create(
+                        user=user,
+                        question=CHECKIN_QUESTIONS[-1],
+                        answer=user_input
+                    )
 
-			response = client.chat.completions.create(
-				model="gpt-3.5-turbo",
-				messages=messages
-			)
+                    # Reset for next check-in
+                    request.session['checkin_step'] = 0
+                    request.session.modified = True
+                    return JsonResponse({"reply": "Thank you! Your check-in is complete and responses recorded."})
 
-			reply = response.choices[0].message.content
+            else:
+                # Project Manager (or other roles): Regular GPT response
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": f"You are A.D.A.M. (Automated Digital Assistant for Management). Here are the team's current tasks:\n{task_summary}"
+                        },
+                        {
+                            "role": "user",
+                            "content": user_input
+                        }
+                    ]
+                )
+                reply = response.choices[0].message.content
+                return JsonResponse({"reply": reply})
 
-			# Save assistant reply
-			ConversationMessage.objects.create(session=session, role="assistant", content=reply)
+        except Exception as e:
+            return JsonResponse({"reply": f"Server error: {str(e)}"})
 
-			return JsonResponse({ "reply": reply })
-
-		except Exception as e:
-			return JsonResponse({ "reply": f"Server error: {str(e)}" })
+    return JsonResponse({"reply": "Please send a message to begin."})
