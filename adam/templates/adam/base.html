@@ -29,10 +29,11 @@
 								<li><a href={% url "adam:home" %} id="home-link"><span class="icon solid fa-home">Home</span></a></li>
 								<li><a href={% url "adam:teams" %} id="teams-link"><span class="icon solid fa-th">Teams</span></a></li>
 								<li><a href={% url "adam:profile" %} id="profile-link"><span class="icon solid fa-user">Profile</span></a></li>
+								<li><a href={% url "adam:view_summary" %} id="summary-link"><span class="icon solid fa-user">Summaries</span></a></li>
 							</ul>
 							{% if user.is_authenticated %}
 								<div class="px-4 pt-2 pb-1">
-									<a href="{% url 'new_chat' %}" class="text-sm text-blue-400 hover:underline">
+									<a href="{% url 'adam:refresh_session' %}" class="text-sm text-blue-400 hover:underline">
 									+ New Chat
 									</a>
 								</div>

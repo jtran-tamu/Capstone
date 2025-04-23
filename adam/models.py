@@ -1,8 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Artist(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    team_id = models.IntegerField()
+
 class Task(models.Model):
-    artist = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks')
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='tasks')
     due_date = models.DateField()
     progress = models.PositiveIntegerField()
     description = models.TextField()
@@ -14,10 +18,6 @@ class ProjectManager(models.Model):
     team_id = models.IntegerField()
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-class Artist(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    team_id = models.IntegerField()
-
 class Question(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -28,10 +28,11 @@ class Answer(models.Model):
     response = models.TextField()
 
 class CheckinResponse(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     question = models.CharField(max_length=255)
     answer = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    session_key = models.CharField(max_length=40, db_index=True)
 
 class Form(models.Model):
     questions = models.ManyToManyField(Question)
@@ -41,6 +42,10 @@ class Form(models.Model):
 
 class Report(models.Model):
     forms = models.ManyToManyField(Form)
+    summary = models.TextField()
+
+class Summary(models.Model):
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE)
     summary = models.TextField()
 
 class ConversationSession(models.Model):

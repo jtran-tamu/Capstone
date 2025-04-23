@@ -36,7 +36,7 @@
 			chatInput.value = "";
 
 			// Send message to chatbot API
-			fetch("/chatbot-api/", {
+			fetch("{% url 'adam:new_chat' %}", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -86,17 +86,18 @@
 		background: #2f3136;
 	}
 	.chat-container {
+		max-width: 800px;
 		width: 100%;
-		height: auto;
+		max-height: 90vh;
+		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		border-radius: 0;
 		overflow: hidden;
 		background: #36393f;
 		color: white;
-		margin: 0;
 		padding: 0;
-        }
+	}
+	
 
 	div#chatBox {
 		height: 700px;
